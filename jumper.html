@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Jumper</title>
+<style>
+#field {
+background-color:aqua;
+border:5px solid green;
+position:relative;
+}
+#ball {
+background-color:red;
+width:30px;
+height:30px;
+border-radius:50%;
+position:relative;
+left:150px;
+}
+.colomnBottom {
+position:absolute;
+right:0px;
+bottom:0px;
+width:20px;
+height:200px;
+background-color:grey;
+}
+.colomnTop {
+position:absolute;
+right:0px;
+top:0px;
+width:20px;
+height:200px;
+background-color:grey;
+}
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="field"><div id="ball"></div></div>
+
+<script>
+$(document).ready(function(){
+var fieldWidth=screen.availWidth-300;
+var fieldHeight=screen.availHeight-200;
+var fieldHeightPx=fieldHeight+"px";
+var count=0;
+var countTop=0;
+var countBottom=0;
+$(document).on("keypress",function(){
+
+//ball jump
+$("#ball").stop();
+if($("#ball").position().top>70){
+$("#ball").animate({top:'-=70px'},200,function(){$("#ball").animate({top:''+(fieldHeight-30)+'px'},1000,"linear");});
+}
+else {
+$("#ball").animate({top:'0px'},200,function(){$("#ball").animate({top:''+(fieldHeight-30)+'px'},1000,"linear");});
+}
+});
+$("#field").css({"width":fieldWidth,"height":fieldHeight,"margin":"auto"});
+   $("#ball").animate({top:''+(fieldHeight-30)+'px'},1000,"linear");
+   
+//ball jump end
+//coloms
+function moveColomn(){
+count++;
+
+if(count%100==0){
+
+if(Math.random()<0.5){
+var heightC=Math.random()*200+200;
+var colomn=$('<div class="colomnBottom"></div>').css("height",heightC);
+
+
+$("#field").append(colomn);
+$(".colomnBottom").animate({left:'0px'},5000,"linear",function(){$(".colomnBottom:eq(0)").remove();});
+}
+
+
+else {
+var heightC=Math.random()*200+200;
+var colomn=$('<div class="colomnTop"></div>').css("height",heightC);
+$("#field").append(colomn);
+$(".colomnTop").animate({left:'0px'},5000,"linear",function(){$(".colomnTop:eq(0)").remove();});
+}
+}
+}
+setInterval(moveColomn,10);
+});
+
+</script>
+</body> 
+</html>

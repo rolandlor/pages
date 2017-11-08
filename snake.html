@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Snake</title>
+<style>
+#formContainer{
+width:200px;
+margin-left:auto;
+margin-right:auto;
+margin-top:50px;
+background-color:rgb(240,240,240);
+border:1px solid grey;
+padding-top:20px;
+box-shadow:0px 0px 40px grey;
+}
+#initialForm {
+width:150px;
+margin:auto;
+}
+input {
+box-sizing:border-box;
+width:150px;
+margin:auto;
+}
+.inputMargin {
+margin-bottom:20px;
+}
+.inputButtonMargin {
+margin-top:70px;
+margin-bottom:20px;
+}
+#field {
+position:relative;
+display:none;
+background-color:green;
+border:5px solid black;
+}
+p {
+margin:0px;
+}
+.validationText {
+position:relative;
+top:-20px;
+}
+#randomElement {
+position:relative;
+display:none;
+background-color:yellow;
+width:10px;
+height:10px;
+}
+#snakeHead {
+background-color:red;
+width:10px;
+height:10px;
+position:absolute;
+}
+.snakeHeadC {
+background-color:red;
+width:10px;
+height:10px;
+position:absolute;
+}
+</style>
+</head>
+<body>
+<div id="formContainer">
+<form id="initialForm" name="initForm">
+<p class="inputText">Height:</p>
+<div class="inputMargin">
+<input type="number" name="height" min="100" max="600" step="10"></br>
+</div>
+<p class="inputText">Width:</p>
+<div class="inputMargin">
+<input type="number" name="width" min="100" max="600" step="10"></br>
+</div>
+<p class="inputText">Difficulty:</p>
+<div class="inputMargin">
+<input type="range" name="difficulty" min="1" max="20"></br>
+</div>
+<div class="inputButtonMargin">
+<input type="button" name="start" value="Start">
+</div>
+</form>
+</div>
+<div id="field">
+<div id="randomElement"></div>
+<div id="snakeHead"></div>
+</div>
+<script>
+function Block(top,left){
+this.aLeft=left;
+this.aTop=top;
+this.bLeft=0;
+this.bTop=0;
+}
+
+//Variables
+var myForm=document.initForm;
+var screenWidth=screen.availWidth;
+var screenHeight=screen.availHeight;
+var fieldMinWidth=Math.floor((0.1*screenWidth)/10)*10;
+var fieldMaxWidth=Math.floor((0.75*screenWidth)/10)*10;
+var fieldMinHeight=Math.floor((0.1*screenHeight)/10)*10;
+var fieldMaxHeight=Math.floor((0.75*screenHeight)/10)*10;
+var formCont=document.getElementById("formContainer");
+var heightField=document.initForm.height;
+var widthField=document.initForm.width;
+var rangeField=document.initForm.difficulty;
+var marginDiv=document.getElementsByClassName("inputText");
+var funcControl=0;
+var realWidth=0;
+var realHeight=0;
+var speed=1;
+var randNumWidth=0;
+var randNumHeight=0;
+var direction;
+var interval;
+var snakeHeadEl=document.getElementById("snakeHead");
+var randFood=document.getElementById("randomElement");
+var newSnakeEl=0;
+var foodLeft;
+var foodTop;
+var fieldGame=document.getElementById("field");
+//****************
+//****************
+//****************
+
+heightField.min=Math.floor(fieldMinHeight);
+heightField.max=Math.floor(fieldMaxHeight);
+widthField.min=Math.floor(fieldMinWidth);
+widthField.max=Math.floor(fieldMaxWidth);
+
+function validationFunction(){
+var valText=document.getElementsByClassName("validationText");
+while(valText[0]){
+valText[0].parentNode.removeChild(valText[0]);
+valText=document.getElementsByClassName("validationText");
+funcControl=0;
+}
+
+
+if(heightField.value<fieldMinHeight || heightField.value>fieldMaxHeight){
+var validationEl1=document.createElement("p");
+var validationText1=document.createTextNode("Enter a number between: "+Math.floor(fieldMinHeight)+" and "+Math.floor(fieldMaxHeight));
+validationEl1.appendChild(validationText1);
+validationEl1.style.color="red";
+validationEl1.className="validationText";
+myForm.insertBefore(validationEl1,marginDiv[1]);
+funcControl=1;
+
+}
+if(widthField.value<fieldMinWidth || widthField.value>fieldMaxWidth){
+var validationEl2=document.createElement("p");
+var validationText2=document.createTextNode("Enter a number between: "+Math.floor(fieldMinWidth)+" and "+Math.floor(fieldMaxWidth));
+validationEl2.appendChild(validationText2);
+validationEl2.style.color="red";
+validationEl2.className="validationText";
+myForm.insertBefore(validationEl2,marginDiv[2]);
+funcControl=1;
+}
+
+if((heightField.value%10)!=0){
+var validationEl1=document.createElement("p");
+var validationText1=document.createTextNode("The number must be divided by 10");
+validationEl1.appendChild(validationText1);
+validationEl1.style.color="red";
+validationEl1.className="validationText";
+myForm.insertBefore(validationEl1,marginDiv[1]);
+funcControl=1;
+}
+
+if((widthField.value%10)!=0){
+var validationEl2=document.createElement("p");
+var validationText2=document.createTextNode("The number must be divided by 10");
+validationEl2.appendChild(validationText2);
+validationEl2.style.color="red";
+validationEl2.className="validationText";
+myForm.insertBefore(validationEl2,marginDiv[2]);
+funcControl=1;
+}
+}
+function startFunction(){
+if(funcControl==0) {
+formCont.style.display="none";
+fieldGame.style.display="block";
+fieldGame.style.width=widthField.value+"px";
+fieldGame.style.height=heightField.value+"px";
+fieldGame.style.margin="auto";
+realWidth=myForm.width.value;
+realHeight=myForm.height.value;
+speed=1000/myForm.difficulty.value;
+var randFood=document.getElementById("randomElement");
+foodRand();
+snakeHeadEl.style.top=0+"px";
+snakeHeadEl.style.left=0+"px";
+document.addEventListener("keydown",directionKey);
+}
+}
+
+myForm.start.addEventListener("click",validationFunction);
+myForm.start.addEventListener("click",startFunction);
+//**********
+//**********
+//**********
+//Game
+//**********
+//**********
+//**********
+function rand(){
+randNumWidth=Math.floor(Math.floor(Math.random()*(realWidth-9))/10)*10;
+randNumHeight=Math.floor(Math.floor(Math.random()*(realHeight-9))/10)*10;
+}
+function foodRand(){
+rand();
+randFood.style.left=randNumWidth+"px";
+randFood.style.top=randNumHeight+"px";
+randFood.style.display="block";
+}
+function SnakeEl(aaTop,aaLeft) {
+	this.aTop=aaTop;
+	this.aLeft=aaLeft;
+	this.bTop=0;
+	this.bLeft=0;
+};
+var snakeHeadO=new SnakeEl(0,0);
+var snakeArray=[];
+var snakeArray2=[];
+snakeArray.push(snakeHeadO);
+function directionKey(e){
+switch (e.keyCode) {
+case 37: 
+		 if(direction!="right"){
+		 direction="left";
+		 clearInterval(interval);
+		 interval=setInterval(moveLeft,speed);
+		 }
+		 break;
+		 
+case 38: 
+		 if(direction!="down"){
+		 direction="up";
+		 clearInterval(interval);
+		 interval=setInterval(moveUp,speed);
+		 }
+		 break;
+case 39: 
+		 if(direction!="left"){
+		 direction="right";
+		 clearInterval(interval);
+		 interval=setInterval(moveRight,speed);
+		 }
+		 break;
+case 40: 
+		 if(direction!="up"){
+		 direction="down";
+		 clearInterval(interval);
+		 interval=setInterval(moveDown,speed);
+		 }
+		 break;
+}
+}
+
+function moveHelp(){
+for(var i=0;i<snakeArray.length;i++){
+snakeArray[i].bLeft=snakeArray[i].aLeft;
+snakeArray[i].bTop=snakeArray[i].aTop;
+}
+}
+function followBlock(){
+var snakeHeadC=document.getElementsByClassName("snakeHeadC");
+if(snakeArray.length>1){
+for(var i=1;i<snakeArray.length;i++){
+snakeArray[i].aLeft=snakeArray[i-1].bLeft;
+snakeArray[i].aTop=snakeArray[i-1].bTop;
+snakeHeadC[i-1].style.top=snakeArray[i].aTop+"px";
+snakeHeadC[i-1].style.left=snakeArray[i].aLeft+"px";
+}
+}
+}
+function createBlock(){
+var snakeHeadO=new SnakeEl(0,0);
+snakeArray.push(snakeHeadO);
+var newElement=document.createElement("div");
+newElement.className="snakeHeadC";
+document.getElementById("field").appendChild(newElement);
+}
+function moveLeft(){
+moveHelp();
+followBlock();
+snakeArray[0].aLeft-=10;
+snakeHeadEl.style.left=snakeArray[0].aLeft+"px";
+if((snakeHeadEl.style.left==randFood.style.left) && (snakeHeadEl.style.top==randFood.style.top)){
+foodRand();
+createBlock();
+
+}
+collisionDetect();
+}
+
+function moveUp(){
+moveHelp();
+followBlock();
+snakeArray[0].aTop-=10;
+snakeHeadEl.style.top=snakeArray[0].aTop+"px";
+if((snakeHeadEl.style.left==randFood.style.left) && (snakeHeadEl.style.top==randFood.style.top)){
+foodRand();
+newSnakeEl=1;
+createBlock();
+
+}
+collisionDetect();
+}
+function moveRight(){
+moveHelp();
+followBlock();
+snakeArray[0].aLeft+=10;
+snakeHeadEl.style.left=snakeArray[0].aLeft+"px";
+if((snakeHeadEl.style.left==randFood.style.left) && (snakeHeadEl.style.top==randFood.style.top)){
+foodRand();
+newSnakeEl=1;
+createBlock();
+
+}
+collisionDetect();
+}
+function moveDown(){
+moveHelp();
+followBlock();
+snakeArray[0].aTop+=10;
+snakeHeadEl.style.top=snakeArray[0].aTop+"px";
+if((snakeHeadEl.style.left==randFood.style.left) && (snakeHeadEl.style.top==randFood.style.top)){
+foodRand();
+newSnakeEl=1;
+createBlock();
+
+}
+collisionDetect();
+}
+function collisionDetect(){
+for(var i=1;i<snakeArray.length;i++){
+if((snakeArray[0].aTop==snakeArray[i].aTop) && (snakeArray[0].aLeft==snakeArray[i].aLeft) || (snakeArray[0].aTop==0) ||(snakeArray[0].aTop==parseInt(fieldGame.style.height)-10) || (snakeArray[0].aLeft==0) ||(snakeArray[0].aLeft==parseInt(fieldGame.style.width)-10)) {
+clearInterval(interval);
+}
+}
+}
+</script> 
+</body> 
+</html>

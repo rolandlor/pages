@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>word learner</title>
+<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+<style>
+#root {
+border:2px solid grey;
+border-radius:5px;
+padding:50px;
+width:500px;
+margin:auto;
+overflow:hidden;
+}
+.actual {
+text-align:center;
+font-size:60px;
+margin-bottom:50px;
+}
+.tip {
+border:1px solid Green;
+border-radius:5%;
+padding:10px;
+text-align:center;
+font-size:20px;
+float:left;
+margin:3px;
+}
+.tip:hover {
+background-color:rgb(230,230,230);
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+ <script type="text/babel">
+ class App extends React.Component {
+ constructor(props) {
+    super(props);
+    this.state = {      
+      solvedword: 0
+    };
+	this.handleWordsClick = this.handleWordsClick.bind(this);
+  }
+handleWordsClick(c){
+this.setState({
+      solvedword: c
+    });
+}
+  render() {
+  const tipwords=[];  	
+	for(let i=0;i<this.props.words.length;i++){
+	tipwords.push(<WordOpportunity index={i} actualword={this.props.words[this.state.solvedword].word1} word={this.props.words[i].word2} onWordsClicked={this.handleWordsClick}/>);	
+	}		
+    return (
+	<div>
+	<ActualWordElement actualword={this.props.words[this.state.solvedword].word1}/>
+	{tipwords}
+	</div>
+	);
+  }
+}
+ 
+ class ActualWordElement extends React.Component {
+  render() {
+    return <div className="actual">{this.props.actualword}</div>
+  }
+}
+
+class WordOpportunity extends React.Component {
+constructor(props) {
+    super(props);
+    this.clicked = this.clicked.bind(this);
+  }
+clicked() {
+    this.props.onWordsClicked(this.props.index);
+  }
+  render() {
+    return <div className="tip" onClick={this.clicked}>{this.props.word}</div>
+  }
+}
+
+ const WORDS = [
+  {word1: 'zahlen', word2: 'fizetni'},
+  {word1: 'danken', word2: 'köszönni'},
+  {word1: 'namen', 	word2: 'nevezni'},
+  {word1: 'möchten',word2: 'szeretni'},
+  {word1: 'danken', word2: 'köszönni'},
+  {word1: 'namen', 	word2: 'nevezni'},  
+];
+ ReactDOM.render(
+  <App words={WORDS}/>,
+  document.getElementById('root')
+);
+ </script>
+</body> 
+</html>
